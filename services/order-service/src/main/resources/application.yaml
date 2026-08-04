@@ -1,0 +1,27 @@
+spring:
+  application:
+    name: order-service
+  #  datasource:
+  #   url: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}
+  #   username: ${DB_USER}
+  #   password: ${DB_PASSWORD}
+  datasource:
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:order_db}
+    username: ${DB_USER:root}
+    password: ${DB_PASSWORD:password}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: always
