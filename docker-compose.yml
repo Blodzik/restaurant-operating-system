@@ -1,0 +1,207 @@
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+        test: [ "CMD", "rabbitmq-diagnostics", "check_port_connectivity" ]
+        interval: 10s
+        retries: 5
+  menu-db:
+    image: mysql:8
+    container_name: menu-db
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_DATABASE: menu_db
+      MYSQL_ROOT_PASSWORD: password
+    volumes:
+      - ./docker/mysql-data/menu:/var/lib/mysql
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  menu-service:
+    build: ./services/menu-service
+    container_name: menu-service
+    ports:
+      - "8081:8080"
+    environment:
+      DB_HOST: menu-db
+      DB_PORT: 3306
+      DB_NAME: menu_db
+      DB_PASSWORD: password
+    depends_on:
+      menu-db:
+        condition: service_healthy
+  billing-db:
+    image: mysql:8
+    container_name: billing-db
+    ports:
+      - "3308:3306"
+    environment:
+      MYSQL_DATABASE: billing_db
+      MYSQL_ROOT_PASSWORD: password
+    volumes:
+      - ./docker/mysql-data/billing:/var/lib/mysql
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  billing-service:
+    build: ./services/billing-service
+    container_name: billing-service
+    ports:
+      - "8082:8080"
+    environment:
+      DB_HOST: billing-db
+      DB_PORT: 3306
+      DB_NAME: billing_db
+      DB_PASSWORD: password
+    depends_on:
+      billing-db:
+        condition: service_healthy
+  floor-db:
+    image: mysql:8
+    container_name: floor-db
+    ports:
+      - "3309:3306"
+    environment:
+      MYSQL_DATABASE: floor_db
+      MYSQL_ROOT_PASSWORD: password
+    volumes:
+      - ./docker/mysql-data/floor:/var/lib/mysql
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  floor-service:
+    build: ./services/floor-service
+    container_name: floor-service
+    ports:
+      - "8083:8080"
+    environment:
+      DB_HOST: floor-db
+      DB_PORT: 3306
+      DB_NAME: floor_db
+      DB_PASSWORD: password
+    depends_on:
+      floor-db:
+        condition: service_healthy
+  identity-db:
+    image: mysql:8
+    container_name: identity-db
+    ports:
+      - "3310:3306"
+    environment:
+      MYSQL_DATABASE: identity_db
+      MYSQL_ROOT_PASSWORD: password
+    volumes:
+      - ./docker/mysql-data/identity:/var/lib/mysql
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  identity-service:
+    build: ./services/identity-service
+    container_name: identity-service
+    ports:
+      - "8084:8080"
+    environment:
+      DB_HOST: identity-db
+      DB_PORT: 3306
+      DB_NAME: identity_db
+      DB_PASSWORD: password
+    depends_on:
+      identity-db:
+        condition: service_healthy
+  kitchen-db:
+    image: mysql:8
+    container_name: kitchen-db
+    ports:
+      - "3311:3306"
+    environment:
+      MYSQL_DATABASE: kitchen_db
+      MYSQL_ROOT_PASSWORD: password
+    volumes:
+      - ./docker/mysql-data/kitchen:/var/lib/mysql
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  kitchen-service:
+    build: ./services/kitchen-service
+    container_name: kitchen-service
+    ports:
+      - "8085:8080"
+    environment:
+      DB_HOST: kitchen-db
+      DB_PORT: 3306
+      DB_NAME: kitchen_db
+      DB_PASSWORD: password
+    depends_on:
+      kitchen-db:
+        condition: service_healthy
+  notification-db:
+    image: mysql:8
+    container_name: notification-db
+    ports:
+      - "3312:3306"
+    environment:
+      MYSQL_DATABASE: notification_db
+      MYSQL_ROOT_PASSWORD: password
+    volumes:
+      - ./docker/mysql-data/notification:/var/lib/mysql
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  notification-service:
+    build: ./services/notification-service
+    container_name: notification-service
+    ports:
+      - "8086:8080"
+    environment:
+      DB_HOST: notification-db
+      DB_PORT: 3306
+      DB_NAME: notification_db
+      DB_PASSWORD: password
+    depends_on:
+      notification-db:
+        condition: service_healthy
+  order-db:
+    image: mysql:8
+    container_name: order-db
+    ports:
+      - "3313:3306"
+    environment:
+      MYSQL_DATABASE: order_db
+      MYSQL_ROOT_PASSWORD: password
+    volumes:
+      - ./docker/mysql-data/order:/var/lib/mysql
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  order-service:
+    build: ./services/order-service
+    container_name: order-service
+    ports:
+      - "8087:8080"
+    environment:
+      DB_HOST: order-db
+      DB_PORT: 3306
+      DB_NAME: order_db
+      DB_PASSWORD: password
+    depends_on:
+      order-db:
+        condition: service_healthy
