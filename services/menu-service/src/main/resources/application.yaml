@@ -1,4 +1,6 @@
 spring:
+  flyway:
+    enabled: true
   application:
     name: menu-service
   #  datasource:
@@ -25,3 +27,5 @@ management:
   endpoint:
     health:
       show-details: always
+
+debug: true
