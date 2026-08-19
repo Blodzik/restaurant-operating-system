@@ -36,7 +36,7 @@ public class MenuItemControllerTest {
 
         Mockito.when(menuItemRepository.findAll()).thenReturn(List.of(menuItem));
 
-        mockMvc.perform(get("/menu-item"))
+        mockMvc.perform(get("/menu-items"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].name").value("Duck Breast"));
     }

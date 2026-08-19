@@ -32,7 +32,7 @@ public class CategoryControllerTest {
 
         Mockito.when(categoryRepository.findAll()).thenReturn(List.of(cat));
 
-        mockMvc.perform(get("/category"))
+        mockMvc.perform(get("/categories"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].name").value("Starters"));
     }

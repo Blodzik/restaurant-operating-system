@@ -10,7 +10,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 
 @RestController
-@RequestMapping("/category")
+@RequestMapping("/categories")
 public class CategoryController {
     private final CategoryRepository categoryRepository;
 

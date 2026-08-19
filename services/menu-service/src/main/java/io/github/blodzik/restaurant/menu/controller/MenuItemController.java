@@ -10,7 +10,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 
 @RestController
-@RequestMapping("/menu-item")
+@RequestMapping("/menu-items")
 public class MenuItemController {
     private final MenuItemRepository menuItemRepository;
 
