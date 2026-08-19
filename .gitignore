@@ -16,3 +16,4 @@ application-local.properties
 
 docker/postgres-data/
 docker/rabbitmq-data/docker/mysql-data/
+docker/mysql-data/**
