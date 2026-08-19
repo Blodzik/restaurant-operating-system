@@ -1,7 +1,6 @@
 package io.github.blodzik.restaurant.menu.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -9,6 +8,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Getter @Setter
@@ -47,6 +48,14 @@ public class MenuItem {
     @PositiveOrZero(message = "Stock count cannot be negative")
     @Column(name = "stock_count")
     private Integer stockCount;
+
+    @ManyToMany
+    @JoinTable(
+            name = "menu_item_modifier",
+            joinColumns = @JoinColumn(name = "menu_item_id"),
+            inverseJoinColumns = @JoinColumn(name = "modifier_id")
+    )
+    private Set<Modifier> modifiers = new HashSet<>();
 
     public MenuItem() {
     }

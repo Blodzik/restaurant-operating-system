@@ -1,6 +1,7 @@
 package io.github.blodzik.restaurant.menu.controller;
 
 import io.github.blodzik.restaurant.menu.entity.MenuItem;
+import io.github.blodzik.restaurant.menu.entity.Modifier;
 import io.github.blodzik.restaurant.menu.repository.MenuItemRepository;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
