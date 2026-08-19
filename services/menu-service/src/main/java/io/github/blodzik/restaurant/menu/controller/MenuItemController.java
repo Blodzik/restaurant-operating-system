@@ -1,10 +1,11 @@
 package io.github.blodzik.restaurant.menu.controller;
 
 import io.github.blodzik.restaurant.menu.entity.MenuItem;
-import io.github.blodzik.restaurant.menu.entity.Modifier;
-import io.github.blodzik.restaurant.menu.repository.MenuItemRepository;
+import io.github.blodzik.restaurant.menu.service.MenuItemService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -12,37 +13,53 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/menu-items")
+@RequiredArgsConstructor
 public class MenuItemController {
-    private final MenuItemRepository menuItemRepository;
-
-    public MenuItemController(MenuItemRepository menuItemRepository) {
-        this.menuItemRepository = menuItemRepository;
-    }
+    private final MenuItemService menuItemService;
 
     @GetMapping
     List<MenuItem> all() {
-        return menuItemRepository.findAll();
-    }
-
-    @PostMapping
-    MenuItem create(@Valid @RequestBody MenuItem menuItem) {
-        return menuItemRepository.save(menuItem);
+        return menuItemService.findAll();
     }
 
     @GetMapping("/{id}")
     MenuItem get(@PathVariable Long id) {
-        return menuItemRepository.findById(id)
+        return menuItemService.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    }
+
+    @PostMapping
+    MenuItem create(@Valid @RequestBody MenuItem menuItem) {
+        return menuItemService.create(menuItem);
     }
 
     @PutMapping("/{id}")
     MenuItem update(@PathVariable Long id, @Valid @RequestBody MenuItem menuItem) {
-        menuItem.setId(id);
-        return menuItemRepository.save(menuItem);
+        return menuItemService.update(id, menuItem)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
     @DeleteMapping("/{id}")
     void delete(@PathVariable Long id) {
-        menuItemRepository.deleteById(id);
+        if(!menuItemService.delete(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
     }
+
+    @PostMapping("/{id}/decrement-stock")
+    public ResponseEntity<Void> decrementStock(@PathVariable Long id) {
+        try {
+            boolean success = menuItemService.decrementStock(id);
+
+            if(success) {
+                return ResponseEntity.ok().build();
+            } else {
+                return ResponseEntity.status(HttpStatus.CONFLICT).build();
+            }
+        } catch(IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
+    }
+
+
 }

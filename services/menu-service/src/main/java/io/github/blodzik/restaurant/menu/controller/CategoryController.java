@@ -1,8 +1,9 @@
 package io.github.blodzik.restaurant.menu.controller;
 
 import io.github.blodzik.restaurant.menu.entity.Category;
-import io.github.blodzik.restaurant.menu.repository.CategoryRepository;
+import io.github.blodzik.restaurant.menu.service.CategoryService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -11,37 +12,36 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/categories")
+@RequiredArgsConstructor
 public class CategoryController {
-    private final CategoryRepository categoryRepository;
-
-    public CategoryController(CategoryRepository categoryRepository) {
-        this.categoryRepository = categoryRepository;
-    }
+    private final CategoryService categoryService;
 
     @GetMapping
     List<Category> all() {
-        return categoryRepository.findAll();
+        return categoryService.findAll();
     }
 
     @PostMapping
     Category create(@Valid @RequestBody Category c) {
-        return categoryRepository.save(c);
+        return categoryService.create(c);
     }
 
     @GetMapping("/{id}")
     Category get(@PathVariable Long id) {
-        return categoryRepository.findById(id)
+        return categoryService.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
     @PutMapping("/{id}")
     Category update(@PathVariable Long id, @Valid @RequestBody Category c) {
-        c.setId(id);
-        return categoryRepository.save(c);
+        return categoryService.update(id, c)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
     @DeleteMapping("/{id}")
     void delete(@PathVariable Long id) {
-        categoryRepository.deleteById(id);
+        if(!categoryService.delete(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
     }
 }

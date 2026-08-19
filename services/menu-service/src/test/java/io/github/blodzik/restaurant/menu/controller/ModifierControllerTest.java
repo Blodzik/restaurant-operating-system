@@ -1,7 +1,7 @@
 package io.github.blodzik.restaurant.menu.controller;
 
 import io.github.blodzik.restaurant.menu.entity.Modifier;
-import io.github.blodzik.restaurant.menu.repository.ModifierRepository;
+import io.github.blodzik.restaurant.menu.service.ModifierService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +22,7 @@ public class ModifierControllerTest {
     MockMvc mockMvc;
 
     @MockitoBean
-    private ModifierRepository modifierRepository;
+    private ModifierService modifierService;
 
     @Test
     void shouldReturnAllModifiers() throws Exception {
@@ -31,7 +31,7 @@ public class ModifierControllerTest {
         modifier.setName("Cheese");
         modifier.setPriceDelta(BigDecimal.TWO);
 
-        Mockito.when(modifierRepository.findAll()).thenReturn(List.of(modifier));
+        Mockito.when(modifierService.findAll()).thenReturn(List.of(modifier));
 
         mockMvc.perform(get("/modifiers"))
                 .andExpect(status().isOk())

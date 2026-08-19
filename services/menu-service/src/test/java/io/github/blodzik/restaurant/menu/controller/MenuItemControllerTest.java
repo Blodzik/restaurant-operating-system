@@ -3,7 +3,7 @@ package io.github.blodzik.restaurant.menu.controller;
 import io.github.blodzik.restaurant.menu.entity.Destination;
 import io.github.blodzik.restaurant.menu.entity.MenuItem;
 import io.github.blodzik.restaurant.menu.entity.Modifier;
-import io.github.blodzik.restaurant.menu.repository.MenuItemRepository;
+import io.github.blodzik.restaurant.menu.service.MenuItemService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +24,7 @@ public class MenuItemControllerTest {
     private MockMvc mockMvc;
 
     @MockitoBean
-    private MenuItemRepository menuItemRepository;
+    private MenuItemService menuItemService;
 
     @Test
     void shouldReturnAllMenuItems() throws Exception {
@@ -36,7 +36,7 @@ public class MenuItemControllerTest {
         menuItem.setDestination(Destination.KITCHEN);
         menuItem.setTrackStock(false);
 
-        Mockito.when(menuItemRepository.findAll()).thenReturn(List.of(menuItem));
+        Mockito.when(menuItemService.findAll()).thenReturn(List.of(menuItem));
 
         mockMvc.perform(get("/menu-items"))
                 .andExpect(status().isOk())
@@ -59,7 +59,7 @@ public class MenuItemControllerTest {
         menuItem.setTrackStock(false);
         menuItem.getModifiers().add(modifier);
 
-        Mockito.when(menuItemRepository.findAll()).thenReturn(List.of(menuItem));
+        Mockito.when(menuItemService.findAll()).thenReturn(List.of(menuItem));
 
         mockMvc.perform(get("/menu-items"))
                 .andExpect(status().isOk())

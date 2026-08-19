@@ -1,7 +1,7 @@
 package io.github.blodzik.restaurant.menu.controller;
 
 import io.github.blodzik.restaurant.menu.entity.Category;
-import io.github.blodzik.restaurant.menu.repository.CategoryRepository;
+import io.github.blodzik.restaurant.menu.service.CategoryService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +21,7 @@ public class CategoryControllerTest {
     private MockMvc mockMvc;
 
     @MockitoBean
-    private CategoryRepository categoryRepository;
+    private CategoryService categoryService;
 
     @Test
     void shouldReturnAllCategories() throws Exception {
@@ -30,7 +30,7 @@ public class CategoryControllerTest {
         cat.setName("Starters");
         cat.setActive(true);
 
-        Mockito.when(categoryRepository.findAll()).thenReturn(List.of(cat));
+        Mockito.when(categoryService.findAll()).thenReturn(List.of(cat));
 
         mockMvc.perform(get("/categories"))
                 .andExpect(status().isOk())
