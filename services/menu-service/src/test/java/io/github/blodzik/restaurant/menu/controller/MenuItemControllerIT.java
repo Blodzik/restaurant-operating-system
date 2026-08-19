@@ -38,7 +38,7 @@ public class MenuItemControllerIT {
         }
         """;
 
-        mockMvc.perform(post("/category")
+        mockMvc.perform(post("/categories")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(categoryJson))
                 .andDo(print())
@@ -55,7 +55,7 @@ public class MenuItemControllerIT {
                 }
                 """;
 
-        mockMvc.perform(post("/menu-item")
+        mockMvc.perform(post("/menu-items")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestJson))
                 .andDo(print())

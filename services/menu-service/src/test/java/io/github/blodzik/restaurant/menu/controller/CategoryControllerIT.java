@@ -37,14 +37,14 @@ public class CategoryControllerIT {
         }
         """;
 
-        mockMvc.perform(post("/category")
+        mockMvc.perform(post("/categories")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestJson))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").exists())
                 .andExpect(jsonPath("$.name").value("Desserts"));
 
-        mockMvc.perform(get("/category"))
+        mockMvc.perform(get("/categories"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].name").value("Desserts"));
     }

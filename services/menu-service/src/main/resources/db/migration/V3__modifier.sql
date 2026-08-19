@@ -1,0 +1,5 @@
+CREATE TABLE modifier (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    price_delta DECIMAL(10, 2) NOT NULL
+)
