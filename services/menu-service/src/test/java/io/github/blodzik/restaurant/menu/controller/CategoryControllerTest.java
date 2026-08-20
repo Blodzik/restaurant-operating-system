@@ -6,11 +6,14 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
+import java.util.Optional;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -35,5 +38,28 @@ public class CategoryControllerTest {
         mockMvc.perform(get("/categories"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].name").value("Starters"));
+    }
+
+    @Test
+    void shouldReturn400WhenValidationFails() throws Exception {
+        String badRequestJson = """
+                {
+                    "displayOrder": 1,
+                    "active": true
+                }
+                """;
+
+        mockMvc.perform(post("/categories")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(badRequestJson))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void shouldReturn404WhenCategoryNotFound() throws Exception {
+        Mockito.when(categoryService.findById(999L)).thenReturn(Optional.empty());
+
+        mockMvc.perform(get("/categories/999"))
+                .andExpect(status().isNotFound());
     }
 }

@@ -12,6 +12,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.math.BigDecimal;
 import java.util.List;
 
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -36,6 +38,28 @@ public class ModifierControllerTest {
         mockMvc.perform(get("/modifiers"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].name").value("Cheese"));
+    }
+
+    @Test
+    void shouldReturn400WhenValidationFails() throws Exception {
+        String badRequestJson = """
+        {
+            "priceDelta": -5.50
+        }
+        """;
+
+        mockMvc.perform(post("/modifiers")
+                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                        .content(badRequestJson))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void shouldReturn404WhenModifierNotFound() throws Exception {
+        Mockito.when(modifierService.findById(999L)).thenReturn(java.util.Optional.empty());
+
+        mockMvc.perform(get("/modifiers/999"))
+                .andExpect(status().isNotFound());
     }
 
 }
