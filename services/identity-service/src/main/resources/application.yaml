@@ -25,3 +25,7 @@ management:
   endpoint:
     health:
       show-details: always
+
+jwt:
+  secret: "this-is-a-super-long-secret-key-that-has-more-than-32-characters-for-safety"
+  expiration-ms: 200000
