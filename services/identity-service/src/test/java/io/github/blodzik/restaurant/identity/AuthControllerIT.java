@@ -3,6 +3,7 @@ package io.github.blodzik.restaurant.identity;
 import io.github.blodzik.restaurant.identity.entity.Role;
 import io.github.blodzik.restaurant.identity.entity.User;
 import io.github.blodzik.restaurant.identity.repository.UserRepository;
+import io.github.blodzik.restaurant.identity.service.JwtService;
 import io.github.blodzik.restaurant.identity.service.PasswordService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,6 +38,9 @@ public class AuthControllerIT {
     @Autowired
     PasswordService passwordService;
 
+    @Autowired
+    JwtService jwtService;
+
     @BeforeEach
     void setup() {
         userRepository.deleteAll();
@@ -44,6 +48,7 @@ public class AuthControllerIT {
         User user = new User();
         user.setName("admin");
         user.setPasswordHash(passwordService.hash("secret123"));
+        user.setPinHash(passwordService.hash("1234"));
         user.setRole(Role.MANAGER);
         user.setActive(true);
         userRepository.save(user);
@@ -73,5 +78,50 @@ public class AuthControllerIT {
                         }
                         """))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void verifyPinWithValidTokenAndCorrectPinReturns204() throws Exception {
+        User user = userRepository.findByName("admin").orElseThrow();
+
+        String token = jwtService.issueToken(user.getId(), user.getRole());
+
+        mockMvc.perform(post("/auth/verify-pin")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                        {
+                            "pin": "1234"
+                        }
+                        """))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void verifyPinWithValidTokenButWrongPinReturns401() throws Exception {
+        User user = userRepository.findByName("admin").orElseThrow();
+        String token = jwtService.issueToken(user.getId(), user.getRole());
+
+        mockMvc.perform(post("/auth/verify-pin")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                        {
+                            "pin": "9999"
+                        }
+                        """))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void verifyPinWithoutTokenReturns403() throws Exception {
+        mockMvc.perform(post("/auth/verify-pin")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                        {
+                            "pin": "1234"
+                        }
+                        """))
+                .andExpect(status().isForbidden());
     }
 }

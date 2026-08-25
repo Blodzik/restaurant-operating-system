@@ -22,6 +22,7 @@ public class ManagerSeeder implements CommandLineRunner {
             manager.setPasswordHash(passwordService.hash("changeme"));
             manager.setRole(Role.MANAGER);
             manager.setActive(true);
+            manager.setPinHash(passwordService.hash("1234"));
 
             userRepository.save(manager);
             System.out.println("Seeded default admin user");

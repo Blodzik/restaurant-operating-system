@@ -28,4 +28,13 @@ public class AuthService {
 
         return jwtService.issueToken(user.getId(), user.getRole());
     }
+
+    public void verifyPin(Long userId, String rawPin) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"));
+
+        if(user.getPinHash() == null || !passwordService.matches(rawPin, user.getPinHash())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid PIN");
+        }
+    }
 }

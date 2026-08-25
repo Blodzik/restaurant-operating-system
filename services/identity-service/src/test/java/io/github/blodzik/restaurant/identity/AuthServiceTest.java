@@ -17,6 +17,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -55,5 +56,53 @@ public class AuthServiceTest {
 
         String token = authService.authenticate("Nazar", "rawPassword");
         Assertions.assertThat(token).isEqualTo("jwt-token");
+    }
+
+    @Test
+    void verifyPinSucceedsWhenPinIsCorrect() {
+        User user = new User();
+        user.setId(99L);
+        user.setPinHash("hashedPin1234");
+
+        when(userRepository.findById(99L)).thenReturn(Optional.of(user));
+        when(passwordService.matches("1234", "hashedPin1234")).thenReturn(true);
+
+        authService.verifyPin(99L, "1234");
+    }
+
+    @Test
+    void verifyPinThrowsUnauthorizedWhenUserNotFound() {
+        when(userRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> authService.verifyPin(99L, "1234"))
+                .isInstanceOf(ResponseStatusException.class)
+                .extracting("status").isEqualTo(HttpStatus.UNAUTHORIZED);
+    }
+
+    @Test
+    void verifyPinThrowsUnauthorizedWhenPinIsWrong() {
+        User user = new User();
+        user.setId(99L);
+        user.setPinHash("hashedPin1234");
+
+        when(userRepository.findById(99L)).thenReturn(Optional.of(user));
+        when(passwordService.matches("9999", "hashedPin1234")).thenReturn(false);
+
+        assertThatThrownBy(() -> authService.verifyPin(99L, "9999"))
+                .isInstanceOf(ResponseStatusException.class)
+                .extracting("status").isEqualTo(HttpStatus.UNAUTHORIZED);
+    }
+
+    @Test
+    void verifyPinThrowsUnauthorizedWhenUserHasNoPin() {
+        User user = new User();
+        user.setId(99L);
+        user.setPinHash(null);
+
+        when(userRepository.findById(99L)).thenReturn(Optional.of(user));
+
+        assertThatThrownBy(() -> authService.verifyPin(99L, "1234"))
+                .isInstanceOf(ResponseStatusException.class)
+                .extracting("status").isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 }
