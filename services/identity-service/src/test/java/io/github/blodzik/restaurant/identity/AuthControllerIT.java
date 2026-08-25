@@ -72,6 +72,6 @@ public class AuthControllerIT {
                             "name": "admin"
                         }
                         """))
-                .andExpect(status().isBadGateway()));
+                .andExpect(status().isBadRequest());
     }
 }
