@@ -15,7 +15,7 @@ An event-driven, microservices-based restaurant operating system designed to han
 This project is actively under development, following a domain-driven design approach.
 
 - [x] **Menu Service:** Manages categories, menu items, and modifiers. Features thread-safe, atomic stock decrementing with database-level row locking to prevent race conditions during high-volume ordering.
-- [ ] **Identity Service:** JWT-based staff authentication, PIN logins, and role management (Waiter, Kitchen, Manager).
+- [x] **Identity Service:** JWT-based staff authentication, PIN logins, and role management (Waiter, Kitchen, Manager).
 - [ ] **Floor Service:** Table state machine (`FREE` -> `OCCUPIED` -> `DIRTY`) and zone management.
 - [ ] **Order Service:** Handles order creation, cart management, and publishes events via RabbitMQ.
 - [ ] **Kitchen Service:** Consumes order events for real-time kitchen ticketing and preparation tracking.
