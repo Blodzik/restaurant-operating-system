@@ -23,8 +23,7 @@ public class RestaurantTableService {
 
     @Transactional
     public RestaurantTable seat(Long tableId) {
-        RestaurantTable table = tableRepository.findById(tableId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        RestaurantTable table = getTableOrThrow(tableId);
 
         if(table.getTableState() != TableState.FREE) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Table is not free");
@@ -33,5 +32,49 @@ public class RestaurantTableService {
         table.setTableState(TableState.SEATED);
         table.setOccupiedSince(LocalDateTime.now());
         return tableRepository.save(table);
+    }
+
+    @Transactional
+    public RestaurantTable requestBill(Long tableId) {
+        RestaurantTable table = getTableOrThrow(tableId);
+
+        if(table.getTableState() != TableState.SEATED) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Table must be seated to request a bill");
+        }
+
+        table.setTableState(TableState.AWAITING_BILL);
+        return tableRepository.save(table);
+    }
+
+    @Transactional
+    public RestaurantTable markDirty(Long tableId) {
+        RestaurantTable table = getTableOrThrow(tableId);
+
+        if(table.getTableState() == TableState.FREE) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Table is already FREE");
+        } else if (table.getTableState() == TableState.DIRTY) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Table is already DIRTY");
+        }
+
+        table.setTableState(TableState.DIRTY);
+        return tableRepository.save(table);
+    }
+
+    @Transactional
+    public RestaurantTable clean(Long tableId) {
+        RestaurantTable table = getTableOrThrow(tableId);
+
+        if(table.getTableState() != TableState.DIRTY) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Only DIRTY tables can be cleaned");
+        }
+
+        table.setTableState(TableState.FREE);
+        table.setOccupiedSince(null);
+        return tableRepository.save(table);
+    }
+
+    private RestaurantTable getTableOrThrow(Long tableId) {
+        return tableRepository.findById(tableId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 }
