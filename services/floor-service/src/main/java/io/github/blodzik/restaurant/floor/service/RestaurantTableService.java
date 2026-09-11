@@ -10,11 +10,16 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class RestaurantTableService {
-    private RestaurantTableRepository tableRepository;
+    private final RestaurantTableRepository tableRepository;
+
+    public List<RestaurantTable> findAll() {
+        return tableRepository.findAll();
+    }
 
     @Transactional
     public RestaurantTable seat(Long tableId) {
