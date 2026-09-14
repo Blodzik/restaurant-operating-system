@@ -51,8 +51,9 @@ public class OrderItem {
     private Integer quantity;
 
     @NotBlank(message = "Status is required")
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String status;
+    private OrderItemStatus status;
 
     @OneToMany(mappedBy = "orderItem", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItemModifier> modifiers = new ArrayList<>();
