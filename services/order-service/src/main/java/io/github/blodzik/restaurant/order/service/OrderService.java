@@ -63,6 +63,10 @@ public class OrderService {
         return batchRepository.save(openBatch);
     }
 
+    public List<OrderItem> getTableTab(Long tableId) {
+        return itemRepository.findByBatch_TableId(tableId);
+    }
+
 
     private OrderBatch createNewBatch(Long tableId) {
         Integer nextBatchNumber = batchRepository.findMaxBatchNumberForTable(tableId);
