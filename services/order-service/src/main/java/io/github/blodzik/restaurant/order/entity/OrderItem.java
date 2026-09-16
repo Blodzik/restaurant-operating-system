@@ -50,7 +50,7 @@ public class OrderItem {
     @Column(nullable = false)
     private Integer quantity;
 
-    @NotBlank(message = "Status is required")
+    @NotNull(message = "Status is required")
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private OrderItemStatus status;

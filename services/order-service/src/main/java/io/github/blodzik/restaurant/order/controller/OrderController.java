@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/order")
+@RequestMapping("/tables")
 @RequiredArgsConstructor
 @Tag(name = "Orders", description = "Order management for tables and guests")
 public class OrderController {
