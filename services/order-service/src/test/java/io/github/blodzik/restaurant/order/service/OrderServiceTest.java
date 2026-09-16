@@ -1,9 +1,11 @@
 package io.github.blodzik.restaurant.order.service;
 
+import io.github.blodzik.restaurant.order.config.RabbitMQConfig;
 import io.github.blodzik.restaurant.order.entity.Guest;
 import io.github.blodzik.restaurant.order.entity.OrderBatch;
 import io.github.blodzik.restaurant.order.entity.OrderItem;
 import io.github.blodzik.restaurant.order.entity.OrderItemStatus;
+import io.github.blodzik.restaurant.order.event.BatchFireEvent;
 import io.github.blodzik.restaurant.order.repository.GuestRepository;
 import io.github.blodzik.restaurant.order.repository.OrderBatchRepository;
 import io.github.blodzik.restaurant.order.repository.OrderItemRepository;
@@ -14,6 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -21,6 +24,9 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verifyNoInteractions;
 
 @ExtendWith(MockitoExtension.class)
@@ -33,6 +39,9 @@ public class OrderServiceTest {
 
     @Mock
     OrderItemRepository itemRepository;
+
+    @Mock
+    private RabbitTemplate rabbitTemplate;
 
     @InjectMocks
     OrderService orderService;
@@ -68,11 +77,11 @@ public class OrderServiceTest {
 
         OrderBatch newBatch = new OrderBatch();
         newBatch.setId(99L);
-        Mockito.when(batchRepository.save(Mockito.any(OrderBatch.class))).thenReturn(newBatch);
+        Mockito.when(batchRepository.save(any(OrderBatch.class))).thenReturn(newBatch);
 
         OrderItem mockSavedItem = new OrderItem();
         mockSavedItem.setId(100L);
-        Mockito.when(itemRepository.save(Mockito.any(OrderItem.class))).thenReturn(mockSavedItem);
+        Mockito.when(itemRepository.save(any(OrderItem.class))).thenReturn(mockSavedItem);
 
         OrderItem result = orderService.addItemToTable(
                 tableId, guestId, 101L, "Classic Burger", new BigDecimal("15.00"), "KITCHEN", 1
@@ -81,8 +90,8 @@ public class OrderServiceTest {
         assertEquals(100L, result.getId());
 
         Mockito.verify(batchRepository).findMaxBatchNumberForTable(tableId);
-        Mockito.verify(batchRepository).save(Mockito.any(OrderBatch.class));
-        Mockito.verify(itemRepository).save(Mockito.any(OrderItem.class));
+        Mockito.verify(batchRepository).save(any(OrderBatch.class));
+        Mockito.verify(itemRepository).save(any(OrderItem.class));
     }
 
     @Test
@@ -101,7 +110,7 @@ public class OrderServiceTest {
 
         OrderItem mockSavedItem = new OrderItem();
         mockSavedItem.setId(100L);
-        Mockito.when(itemRepository.save(Mockito.any(OrderItem.class))).thenReturn(mockSavedItem);
+        Mockito.when(itemRepository.save(any(OrderItem.class))).thenReturn(mockSavedItem);
 
         OrderItem result = orderService.addItemToTable(
                 tableId, guestId, 101L, "Classic Burger", new BigDecimal("15.00"), "KITCHEN", 1
@@ -109,9 +118,9 @@ public class OrderServiceTest {
 
         assertEquals(100L, result.getId());
 
-        Mockito.verify(itemRepository).save(Mockito.any(OrderItem.class));
+        Mockito.verify(itemRepository).save(any(OrderItem.class));
 
-        Mockito.verify(batchRepository, Mockito.never()).save(Mockito.any(OrderBatch.class));
+        Mockito.verify(batchRepository, Mockito.never()).save(any(OrderBatch.class));
     }
 
     @Test
@@ -128,7 +137,7 @@ public class OrderServiceTest {
         assertEquals("No open batch to fire for this table: 1", exception.getMessage());
 
         verifyNoInteractions(itemRepository);
-        Mockito.verify(batchRepository, Mockito.never()).save(Mockito.any());
+        Mockito.verify(batchRepository, Mockito.never()).save(any());
     }
 
     @Test
@@ -151,7 +160,7 @@ public class OrderServiceTest {
         Mockito.when(itemRepository.findByBatch_TableId(tableId))
                 .thenReturn(List.of(pendingItem));
 
-        Mockito.when(batchRepository.save(Mockito.any(OrderBatch.class))).thenReturn(openBatch);
+        Mockito.when(batchRepository.save(any(OrderBatch.class))).thenReturn(openBatch);
 
         OrderBatch result = orderService.fireBatch(tableId, waiterName);
 
@@ -162,5 +171,11 @@ public class OrderServiceTest {
 
         Mockito.verify(itemRepository).saveAll(Mockito.anyList());
         Mockito.verify(batchRepository).save(openBatch);
+
+        Mockito.verify(rabbitTemplate, times(1)).convertAndSend(
+                eq(RabbitMQConfig.EXCHANGE_NAME),
+                eq(RabbitMQConfig.ROUTING_KEY),
+                any(BatchFireEvent.class)
+        );
     }
 }

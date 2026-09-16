@@ -1,13 +1,16 @@
 package io.github.blodzik.restaurant.order.service;
 
+import io.github.blodzik.restaurant.order.config.RabbitMQConfig;
 import io.github.blodzik.restaurant.order.entity.Guest;
 import io.github.blodzik.restaurant.order.entity.OrderBatch;
 import io.github.blodzik.restaurant.order.entity.OrderItem;
 import io.github.blodzik.restaurant.order.entity.OrderItemStatus;
+import io.github.blodzik.restaurant.order.event.BatchFireEvent;
 import io.github.blodzik.restaurant.order.repository.GuestRepository;
 import io.github.blodzik.restaurant.order.repository.OrderBatchRepository;
 import io.github.blodzik.restaurant.order.repository.OrderItemRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +24,7 @@ public class OrderService {
     private final OrderBatchRepository batchRepository;
     private final GuestRepository guestRepository;
     private final OrderItemRepository itemRepository;
+    private final RabbitTemplate rabbitTemplate;
 
     @Transactional
     public OrderItem addItemToTable(Long tableId, Long guestId, Long menuItemId,
@@ -59,6 +63,10 @@ public class OrderService {
 
         items.forEach(item -> item.setStatus(OrderItemStatus.QUEUED));
         itemRepository.saveAll(items);
+
+        BatchFireEvent event = new BatchFireEvent(tableId, openBatch.getId(), waiterName);
+
+        rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE_NAME, RabbitMQConfig.ROUTING_KEY, event);
 
         return batchRepository.save(openBatch);
     }
