@@ -6,6 +6,7 @@ import io.github.blodzik.restaurant.order.entity.OrderBatch;
 import io.github.blodzik.restaurant.order.entity.OrderItem;
 import io.github.blodzik.restaurant.order.entity.OrderItemStatus;
 import io.github.blodzik.restaurant.order.event.BatchFireEvent;
+import io.github.blodzik.restaurant.order.event.BatchItemDTO;
 import io.github.blodzik.restaurant.order.repository.GuestRepository;
 import io.github.blodzik.restaurant.order.repository.OrderBatchRepository;
 import io.github.blodzik.restaurant.order.repository.OrderItemRepository;
@@ -61,10 +62,26 @@ public class OrderService {
                 .filter(item -> item.getBatch().getId().equals(openBatch.getId()))
                 .toList();
 
+        List<BatchItemDTO> itemDtos = items.stream()
+                        .map(item -> new BatchItemDTO(
+                                item.getId(),
+                                item.getNameSnapshot(),
+                                item.getQuantity(),
+                                item.getDestinationSnapshot()
+                        )).toList();
+
+        BatchFireEvent event = new BatchFireEvent(
+                tableId,
+                openBatch.getId(),
+                "Table: " + tableId,
+                openBatch.getBatchNumber(),
+                openBatch.getFiredAt(),
+                waiterName,
+                itemDtos
+        );
+
         items.forEach(item -> item.setStatus(OrderItemStatus.QUEUED));
         itemRepository.saveAll(items);
-
-        BatchFireEvent event = new BatchFireEvent(tableId, openBatch.getId(), waiterName);
 
         rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE_NAME, RabbitMQConfig.ROUTING_KEY, event);
 
