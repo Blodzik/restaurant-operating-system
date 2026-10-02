@@ -8,7 +8,7 @@ public record BatchFireEvent(
         Long tableId,
         Long batchId,
         String tableSnapshot,
-        Integer BatchNumber,
+        Integer batchNumber,
         LocalDateTime firedAt,
         String waiterName,
         List<BatchItemDTO> items
