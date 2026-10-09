@@ -64,7 +64,7 @@ public class KitchenTicketServiceIT {
                 )
         );
 
-        rabbitTemplate.convertAndSend("", RabbitMQConfig.QUEUE_NAME, event);
+        rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE_NAME, RabbitMQConfig.ROUTING_KEY, event);
 
         await().atMost(Duration.ofSeconds(10)).untilAsserted(() ->
                 assertThat(ticketRepository.count()).isEqualTo(1));
